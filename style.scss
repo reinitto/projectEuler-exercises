@@ -1,0 +1,45 @@
+.problemContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.problem {
+  width: 80%;
+  height: auto;
+  background: linear-gradient(30deg, rgb(115, 219, 115), rgb(255, 89, 255));
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  border: 5px black solid;
+  margin: 20px 10px;
+  .problemName {
+    text-align: center;
+  }
+  .problemBody {
+    display: flex;
+    .problemCode {
+      padding: 10px;
+      width: 60%;
+    }
+    .problemText {
+      width: 40%;
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+      .problemComments {
+        height: 80%;
+      }
+      .problemAnswer {
+        height: auto;
+        font-weight: 700;
+        font-size: 22px;
+      }
+    }
+  }
+}
+
+code {
+  display: block;
+}
