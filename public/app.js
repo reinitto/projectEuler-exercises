@@ -63,104 +63,108 @@ function lpf(num = 600851475143) {
 }
 const palindromeComments =
   "A palindromic number reads the same both ways. The largest palindrome made from the product of two 2-digit numbers is 9009 = 91 × 99. Find the largest palindrome made from the product of two 3-digit numbers.";
-// function palindrome(num1, num2, product = 0, num1it = 0, num2it = 0) {
-//   var num1 = num1;
-//   var num2 = num2;
-//   var product = product;
-//   var num1it = num1it;
-//   var num2it = num2it;
-//   if (num1it == num1) {
-//     return {
-//       sum: product,
-//       comments: palindromeComments,
-//       name: "Largest palindrome product"
-//     };
-//   }
-//   let sumInt = (num1 - num1it) * (num2 - num2it);
-//   let sum = ((num1 - num1it) * (num2 - num2it)).toString();
 
-// if (sum.length == 5) {
-//   if (sum[0] == sum[4] && sum[1] == sum[3] && sumInt > product) {
-//     if (num2 == 0) {
-//       return palindrome(num1 - 1, 999, sumInt);
-//     } else {
-//       return palindrome(num1, num2 - 1, sumInt);
-//     }
-//   }
-// }
-//   if (sumInt < product) {
-//     if (num2it == num2) {
-//       return palindrome(num1, num2, product, num1it++, 0);
-//     } else {
-//       if (num1it == num1) {
-//         return {
-//           sum: product,
-//           comments: palindromeComments,
-//           name: "Largest palindrome product"
-//         };
-//       } else return palindrome(num1, num2, product, num1it, num2it++);
-//     }
-//   } else {
-//     if (sum.length == 5 && sum[0] == sum[4] && sum[1] == sum[3]) {
-//       if (num2it == num2) {
-//         return palindrome(num1, num2, sumInt, num1it++, 0);
-//       } else {
-//         if (num1it == num1) {
-//           return {
-//             sum: product,
-//             comments: palindromeComments,
-//             name: "Largest palindrome product"
-//           };
-//         } else return palindrome(num1, num2, sumInt, num1it, num2it++);
-//       }
-//     } else if (
-//       sum.length == 6 &&
-//       sum[0] == sum[5] &&
-//       sum[1] == sum[4] &&
-//       sum[2] == sum[3]
-//     ) {
-//       if (num2it == num2) {
-//         return palindrome(num1, num2, sumInt, num1it++, 0);
-//       } else {
-//         return palindrome(num1, num2, sumInt, num1it, num2it++);
-//       }
-//     } else {
-//       if (num2it == num2) {
-//         return palindrome(num1, num2, product, num1it++, 0);
-//       } else {
-//         if (num1it == num1) {
-//           return {
-//             sum: product,
-//             comments: palindromeComments,
-//             name: "Largest palindrome product"
-//           };
-//         } else return palindrome(num1, num2, product, num1it, num2it++);
-//       }
-//     }
-//   }
-// }
+function isPalindrome(str) {
+  var last = str.length - 1;
+  if (str.length % 2 == 0) {
+    for (let first = 0; first < last; first++) {
+      if (str[first] !== str[last]) {
+        return false;
+      }
+      last--;
+    }
+  } else {
+    var middle = (str.length - 1) / 2;
+    for (let first = 0; first < middle; first++) {
+      if (str[first] !== str[last]) {
+        return false;
+      }
+      last--;
+    }
+  }
+  return true;
+}
+
+function palindrome() {
+  var biggestPalindrome = 0;
+  for (let i = 0; i < 1000; i++) {
+    for (let j = i; j < 1000; j++) {
+      let sum = i * j;
+      let sumStr = sum.toString();
+      if (isPalindrome(sumStr) && sum > biggestPalindrome) {
+        biggestPalindrome = sum;
+      }
+    }
+  }
+  return {
+    sum: biggestPalindrome,
+    name: "Largest palindrome product",
+    comments: palindromeComments,
+    helperFunc: isPalindrome
+  };
+}
+
+const smallestMultipleComments =
+  "2520 is the smallest number that can be divided by each of the numbers from 1 to 10 without any remainder. What is the smallest positive number that is evenly divisible by all of the numbers from 1 to 20?";
+
+function divideEvenly(num) {
+  for (let i = 19; i > 10; i--) {
+    if (num % i !== 0) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function smallestMultiple(num = 20) {
+  while (!divideEvenly(num)) {
+    num += 20;
+  }
+  return {
+    sum: num,
+    name: "Smallest multiple",
+    comments: smallestMultipleComments,
+    helperFunc: divideEvenly
+  };
+}
+
+function timeToCall(func) {
+  var t0 = performance.now();
+  func();
+  var t1 = performance.now();
+  return `Call to ${func().name} took ${(t1 - t0).toFixed(4)} milliseconds.`;
+}
 
 function createProblem(functionName) {
-  let problemName = functionName().name,
-    problemCode = functionName,
-    problemComments = functionName().comments,
-    problemAnswer = functionName().sum;
+  let problemCode = functionName,
+    problemTime = timeToCall(functionName),
+    {
+      sum: problemAnswer,
+      name: problemName,
+      comments: problemComments,
+      helperFunc
+    } = functionName();
+
   return `
   <div class="problem">
         <div class="problemName">
           <h2>${problemName}</h2>
         </div>
         <div class="problemBody">
-          <div class="problemCode"><pre>${problemCode}</pre></div>
+          <div class="problemCode"><pre>${problemCode}</pre><pre>${
+    helperFunc ? helperFunc : ""
+  }</pre></div>
           <div class="problemText">
             <div class="problemComments">${problemComments}</div>
             <div class="problemAnswer" > The answer is:  ${problemAnswer}</div>
+            <div class="problemTime" > ${problemTime}</div>
           </div>
         </div>
       </div>
   `;
 }
-var funcs = [multiples, fibonacci, lpf];
+
+var funcs = [multiples, fibonacci, lpf, palindrome, smallestMultiple];
 window.addEventListener("DOMContentLoaded", function() {
   let problemContainer = document.querySelector(".problemContainer");
   funcs.forEach(function(func) {
