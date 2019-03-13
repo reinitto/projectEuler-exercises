@@ -418,6 +418,135 @@ function factorial_digit_sum(factorial = 100) {
   let factorialArr = factorialProduct(factorial);
 }
 
+const colbHash = { 1: 1 };
+
+function colbatzSequence(limit = 1000000, hash = colbHash) {
+  let longestSequence = 1,
+    num;
+  var startNum = 1;
+  while (startNum < limit) {
+    let length = colbSeq(startNum);
+    hash[startNum] = length;
+    if (length > longestSequence) {
+      longestSequence = length;
+      num = startNum;
+    }
+    startNum++;
+  }
+  return { num, longestSequence };
+}
+
+function colbSeq(num, count = 0, hash = colbHash) {
+  if (hash[num]) {
+    return hash[num] + count;
+  }
+  if (num % 2 == 0) {
+    return colbSeq(num / 2, ++count);
+  } else {
+    return colbSeq(num * 3 + 1, ++count);
+  }
+}
+
+const getFactorial = num => {
+  if (num == 1) return 1;
+  return num * getFactorial(num - 1);
+};
+
+function latticePaths(sideLength = 20) {
+  //using binomial distribution
+
+  let k = getFactorial(sideLength);
+  let arr = [];
+  for (let i = sideLength * 2; i > sideLength; i--) {
+    arr.push(i);
+  }
+  let nPlusK = arr.reduce((acc, val) => {
+    return acc * val;
+  });
+
+  return Math.floor(nPlusK / k);
+}
+
+function toFixed(x) {
+  if (Math.abs(x) < 1.0) {
+    var e = parseInt(x.toString().split("e-")[1]);
+    if (e) {
+      x *= Math.pow(10, e - 1);
+      x = "0." + new Array(e).join("0") + x.toString().substring(2);
+    }
+  } else {
+    var e = parseInt(x.toString().split("+")[1]);
+    if (e > 20) {
+      e -= 20;
+      x /= Math.pow(10, e);
+      x += new Array(e + 1).join("0");
+    }
+  }
+  return x;
+}
+
+function getNumPower(power) {
+  let num = n(2).pow(power);
+  console.log(num);
+  let string = toFixed(num)
+    .split("")
+    .map(char => parseInt(char));
+  console.log(string);
+  let sum = string.reduce((acc, val) => {
+    return acc + val;
+  });
+
+  return sum;
+}
+
+const ones = [0, 3, 3, 5, 4, 4, 3, 5, 5, 4];
+const tens = [0, 3, 6, 6, 5, 5, 5, 7, 6, 6];
+const hundreds = num => (ones[num] == 0 ? 0 : ones[num] + 7);
+const teens = [3, 6, 8, 6, 8, 7, 7, 9, 8, 8];
+
+function letterCount(num) {
+  let numString = "" + num;
+  let len = numString.length;
+  if (len == 1) {
+    return ones[numString];
+  }
+  if (len == 2 && numString[0] == 1) {
+    return teens[parseInt(numString[1])];
+  }
+  if (len == 2 && numString[0] != 1) {
+    return tens[numString[0]] + ones[numString[1]];
+  }
+
+  if (len == 3) {
+    let sum = 0;
+    sum += hundreds(numString[0]);
+    console.log("sum so far:", sum);
+    if (numString[1] != "0" || numString[2] != "0") {
+      sum += 3; //and
+      console.log("added AND:", sum);
+      if (numString[1] == "1") {
+        sum += parseInt(teens[numString[2]]);
+        console.log("added teens", sum);
+
+        return sum;
+      }
+      if (numString[1] != "1") {
+        sum += tens[numString[1]];
+        sum += ones[numString[2]];
+      }
+    }
+    return sum;
+  }
+}
+
+function letterCountTotal(maxNum) {
+  let total = 0;
+  for (let i = 1; i <= maxNum; i++) {
+    total += letterCount(i);
+  }
+  return total;
+}
+
 function createProblem(functionName) {
   let problemCode = functionName,
     problemTime = timeToCall(functionName),
@@ -460,7 +589,9 @@ var funcs = [
   //primeSum
   largestGridProduct,
   highlyDivisibleTriangleNum,
-  large_sum
+  large_sum,
+  colbatzSequence,
+  latticePaths
 ];
 window.addEventListener("DOMContentLoaded", function() {
   let problemContainer = document.querySelector(".problemContainer");
