@@ -168,6 +168,7 @@ function nthPrime() {
 }
 
 function isPrime(num) {
+  if (num == 0 || num == 1) return false;
   for (let i = Math.floor(Math.sqrt(num)); i > 1; i--) {
     if (num % i == 0) return false;
   }
@@ -402,12 +403,6 @@ function large_sum(arr = large_nums_arr) {
   arr.forEach(num => (largeSum += parseInt(num.slice(0, 13))));
   return largeSum.toString().slice(0, 10);
 }
-function timeToCall(func) {
-  var t0 = performance.now();
-  func();
-  var t1 = performance.now();
-  return `Call to ${func().name} took ${(t1 - t0).toFixed(4)} milliseconds.`;
-}
 
 function factorialProduct(num) {
   if (num == 1) return 1;
@@ -467,36 +462,128 @@ function latticePaths(sideLength = 20) {
   return Math.floor(nPlusK / k);
 }
 
-function toFixed(x) {
-  if (Math.abs(x) < 1.0) {
-    var e = parseInt(x.toString().split("e-")[1]);
-    if (e) {
-      x *= Math.pow(10, e - 1);
-      x = "0." + new Array(e).join("0") + x.toString().substring(2);
-    }
-  } else {
-    var e = parseInt(x.toString().split("+")[1]);
-    if (e > 20) {
-      e -= 20;
-      x /= Math.pow(10, e);
-      x += new Array(e + 1).join("0");
+function powerDigitSum(limit = 1000) {
+  let string = [2];
+  let carryOver = false;
+  for (let power = 2; power <= limit; power++) {
+    console.log(power);
+    for (let i = string.length - 1; i >= 0; i--) {
+      let multiplied = carryOver
+        ? (string[i] * 2 + 1).toString()
+        : (string[i] * 2).toString();
+      // console.log("multiplied:", multiplied);
+      if (multiplied.length > 1) {
+        string[i] = parseInt(multiplied[1]);
+        if (i == 0) {
+          string.splice(0, 0, 1);
+          carryOver = false;
+        } else {
+          carryOver = true;
+        }
+      } else {
+        //console.log("string:", string);
+        string[i] = parseInt(multiplied);
+        carryOver = false;
+      }
     }
   }
-  return x;
+  let res = string.reduce((acc, val) => acc + val);
+  return res;
 }
 
-function getNumPower(power) {
-  let num = n(2).pow(power);
-  console.log(num);
-  let string = toFixed(num)
-    .split("")
-    .map(char => parseInt(char));
-  console.log(string);
-  let sum = string.reduce((acc, val) => {
-    return acc + val;
-  });
+function multiplyBySingleDigit(arr, digit) {
+  var string = [...arr];
+  let carryOver = false;
+  if (digit == 1) return string;
+  for (let i = string.length - 1; i >= 0; i--) {
+    let multiplied = carryOver
+      ? (string[i] * digit + carryOver).toString()
+      : (string[i] * digit).toString();
+    if (multiplied.length == 2) {
+      string[i] = parseInt(multiplied[1]);
+      if (i == 0) {
+        string.splice(0, 0, parseInt(multiplied[0]));
+        carryOver = false;
+      } else {
+        carryOver = parseInt(multiplied[0]);
+      }
+    } else {
+      string[i] = parseInt(multiplied);
+      carryOver = false;
+    }
+  }
+  return string;
+}
 
-  return sum;
+function factorialDigitSum(limit = 99) {
+  let string = [1];
+  let oneOver = false;
+
+  for (let factorial = 1; factorial <= limit; factorial++) {
+    if (factorial - 10 >= 0) {
+      let fact_string = factorial.toString();
+      let string1 = [];
+      if (fact_string[1] != 0) {
+        string1 = Array.from(multiplyBySingleDigit(string, fact_string[1]));
+      }
+      let string2 = Array.from(multiplyBySingleDigit(string, fact_string[0]));
+      //  console.log("string2", string2);
+      string2.splice(string2.length, 0, 0);
+      string = string2;
+      //add ones and tens together
+      if (string1 && string1.length > 0) {
+        console.log(
+          `factorial: ${factorial} string: ${string} string1 ${string1}`
+        );
+        let offset = string.length - string1.length;
+        let carryOver = false;
+        for (let i = string.length - 1; i >= 0; i--) {
+          let sum = 0;
+          if (i - offset < 0) {
+            sum = carryOver ? (string[i] + 1).toString() : string[i];
+          } else {
+            sum = carryOver
+              ? (string[i] + string1[i - offset] + 1).toString()
+              : (string[i] + string1[i - offset]).toString();
+          }
+          if (sum.length > 1) {
+            string[i] = parseInt(sum[1]);
+            if (i + offset == 0) {
+              string.unshift(1);
+              carryOver = false;
+            }
+            carryOver = true;
+          } else {
+            string[i] = parseInt(sum);
+            carryOver = false;
+          }
+        }
+        console.log(string);
+      }
+    } else {
+      for (let i = string.length - 1; i >= 0; i--) {
+        let multiplied = oneOver
+          ? (string[i] * factorial + oneOver).toString()
+          : (string[i] * factorial).toString();
+        if (multiplied.length == 2) {
+          string[i] = parseInt(multiplied[1]);
+          if (i == 0) {
+            string.splice(0, 0, parseInt(multiplied[0]));
+            // console.log("0th", parseInt(multiplied[0]));
+            // console.log("string", string);
+            oneOver = false;
+          } else {
+            oneOver = parseInt(multiplied[0]);
+          }
+        } else {
+          string[i] = parseInt(multiplied);
+          oneOver = false;
+        }
+      }
+    }
+  }
+  let res = string.reduce((acc, val) => acc + val);
+  return res;
 }
 
 const ones = [0, 3, 3, 5, 4, 4, 3, 5, 5, 4];
@@ -547,6 +634,352 @@ function letterCountTotal(maxNum) {
   return total;
 }
 
+function getDivisors(num) {
+  let divisors = [];
+  for (let i = 1; i <= num / 2; i++) {
+    if (num % i == 0) divisors.push(i);
+  }
+  return divisors;
+}
+
+function isAmicable(num) {
+  let divisorSum = getDivisors(num).reduce((acc, val) => acc + val, 0);
+  let num2 = getDivisors(divisorSum).reduce((acc, val) => acc + val, 0);
+  if (num == num2 && num > 0) {
+    console.log("divisor sum:", divisorSum);
+    console.log("num2 divisor sum:", num2);
+  }
+  return num == num2 && num != divisorSum;
+}
+
+function amicableNums(limit = 10000) {
+  let amicableSum = 0;
+  for (let i = 0; i < limit; i++) {
+    if (isAmicable(i)) amicableSum += i;
+  }
+  return amicableSum;
+}
+const months = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+function sundays() {
+  let day = 1;
+  let sundays = 0;
+  for (let i = 1900; i <= 2000; i++) {
+    months.forEach(month => {
+      if (i % 4 == 0 && month == 28) {
+        console.log(`leap year ${i}`);
+        day++;
+      }
+
+      day += month % 7;
+      if (day > 6) day %= 7;
+      if ((day == 0) & (i != 1900)) {
+        console.log(
+          `it's sunday first of the month year: ${i}, month: ${month}`
+        );
+        sundays++;
+      }
+    });
+  }
+  return sundays;
+}
+// max path problem 67
+// fs.readFile("./public/p067_triangle.txt", function(err, buf) {
+//   //console.log(buf.toString());
+//   console.log(maxPathSum(buf.toString()));
+// });
+const path = `75
+95 64
+17 47 82
+18 35 87 10
+20 04 82 47 65
+19 01 23 75 03 34
+88 02 77 73 07 63 67
+99 65 04 28 06 16 70 92
+41 41 26 56 83 40 80 70 33
+41 48 72 33 47 32 37 16 94 29
+53 71 44 65 25 43 91 52 97 51 14
+70 11 33 28 77 73 17 78 39 68 17 57
+91 71 52 38 17 14 91 43 58 50 27 29 48
+63 66 04 68 89 53 67 30 73 16 69 87 40 31
+04 62 98 27 23 09 70 98 73 93 38 53 60 04 23`;
+
+function maxPathSum(triangle = path) {
+  let rows = triangle.split("\n").map(row => {
+    let arr = row.split(" ").map(str => parseInt(str));
+    return arr;
+  });
+
+  for (let i = 0; i < rows.length - 1; i++) {
+    for (let j = 0; j < rows[i].length; j++) {
+      if (i == 0) {
+        rows[1][0] += rows[i][j];
+        rows[1][1] += rows[i][j];
+        break;
+      }
+      //check your left, if it's bigger, don't add to left side of row below
+      //if first number, no left checking
+      if (j == 0) {
+        rows[i + 1][j] += rows[i][j];
+      } else {
+        //left checking
+        if (rows[i][j] >= rows[i][j - 1]) {
+          //if it's bigger add to row below
+          rows[i + 1][j] += rows[i][j];
+        }
+      }
+
+      //check your right, if it's bigger, don't add to right side of the row below
+
+      if (j == rows[i].length - 1) {
+        rows[i + 1][j + 1] += rows[i][j];
+      } else {
+        if (rows[i][j] > rows[i][j + 1]) {
+          rows[i + 1][j + 1] += rows[i][j];
+        }
+      }
+    }
+  }
+  let maxPath = rows[rows.length - 1].reduce((acc, val) =>
+    val > acc ? (acc = val) : (acc = acc)
+  );
+
+  return maxPath;
+}
+
+function get_abundantNums(limit = 28123) {
+  let res = [];
+  for (let i = 1; i < 28123; i++) {
+    let divisorSum = getDivisors(i).reduce((acc, val) => acc + val, 0);
+    if (divisorSum > i) res.push(i);
+  }
+  return res;
+}
+
+function hasAbSum(num, abundantNums) {
+  for (let i = 0; i < abundantNums.length; i++) {
+    for (let j = 0; j < abundantNums.length; j++) {
+      if (abundantNums[i] + abundantNums[j] == num) return true;
+      if (abundantNums[i] + abundantNums[j] > num) break;
+    }
+  }
+  return false;
+}
+
+function nonAbundantNums(limit = 28123) {
+  const abundantNums = get_abundantNums();
+  const abundantNumsLength = abundantNums.length;
+  let nonAbundantSum = 0;
+  for (let num = 1; num < limit; num++) {
+    if (!hasAbSum(num, abundantNums)) {
+      nonAbundantSum += num;
+    }
+  }
+  return nonAbundantSum;
+}
+
+// Problem 22
+// fs.readFile("./p022_names.txt", function(err, buf) {
+//   //console.log(buf.toString());
+//   let names = buf.toString().split(",");
+//   let goodNames = names.map(name => {
+//     return name.replace(/\"/g, "");
+//   });
+//   let total = 0;
+//   let sorted = goodNames.sort();
+//   sorted.forEach((word, i) => {
+//     let wordVal = 0;
+//     for (let i = 0; i < word.length; i++) {
+//       wordVal += word.charCodeAt(i) - 64;
+//     }
+
+//     total += wordVal * (i + 1);
+//   });
+//   console.log(total);
+// });
+
+// Problem 24
+
+// function perms(subString) {
+//   let perms = [];
+//   for (let i = 0; i < subString.length; i++) {
+//     let letter = subString[i];
+//     let subSubString = subString.slice(i, 1);
+//     allPerms(letter, subSubString);
+//   }
+// }
+
+function perms(restLetters, permsArr, subPerm = "") {
+  if (restLetters.length == 1) {
+    permsArr.push(subPerm + restLetters);
+    return;
+  } else {
+    for (let i = 0; i < restLetters.length; i++) {
+      perms(
+        restLetters.slice(0, i) + restLetters.slice(i + 1),
+        permsArr,
+        subPerm + restLetters[i]
+      );
+    }
+  }
+  return permsArr;
+}
+function lexicographic_perms(string = "0123456789") {
+  var permutations = [];
+  perms(string, permutations);
+  return permutations[999999];
+}
+
+//Problem 25
+
+function fibonacciNum(l = 3, prev = [1], curr = [1], i = 2) {
+  if (curr.length == l) {
+    return i;
+  } else {
+    return fibonacciNum(l, curr, add(prev, [...curr]), ++i);
+  }
+}
+
+function add(num1, num2) {
+  let arr1 = num1,
+    arr2 = num2;
+  if (num1.length < num2.length) {
+    arr1 = num2;
+    arr2 = num1;
+  }
+  let offset = arr1.length - arr2.length;
+  let carryOver = false;
+  for (let i = arr1.length - 1; i >= 0; i--) {
+    let sum = 0;
+    if (i - offset < 0) {
+      sum = carryOver ? (arr1[i] + 1).toString() : arr1[i];
+    } else {
+      sum = carryOver
+        ? (arr1[i] + arr2[i - offset] + 1).toString()
+        : (arr1[i] + arr2[i - offset]).toString();
+    }
+    if (sum.length > 1) {
+      arr1[i] = parseInt(sum[1]);
+      carryOver = true;
+      if (i == 0) arr1 = [1, ...arr1];
+    } else {
+      arr1[i] = parseInt(sum);
+      carryOver = false;
+    }
+  }
+  return arr1;
+}
+//Problem 26
+function reciprocal(limit = 1000) {
+  let d = 0;
+  let maxLength = 0;
+  for (let i = 2; i <= limit; i++) {
+    if (divide(i).repeat.length > maxLength) {
+      maxLength = divide(i).repeat.length;
+      d = i;
+    }
+  }
+  return { d, maxLength };
+}
+
+function divide(num2, num1 = 1, frac = [], dividends = []) {
+  //Check if num1 has already been encountered, that means that the a new loop is beginning
+  let index = dividends.indexOf(num1);
+  if (index > -1) {
+    let answ = frac.join("");
+    let length = dividends.length - index;
+    let repeat = frac.slice(-length).join("");
+    return { answ, repeat };
+  }
+  //add num1 to dividends
+  dividends.push(num1);
+  if (num1 % num2 == 0) {
+    frac.push(num1 / num2);
+    let answ = frac.join("");
+    return answ;
+  }
+  if (num1 < num2) {
+    frac.push(0);
+    return divide(num2, num1 * 10, frac, dividends);
+  }
+
+  let rem = num1 % num2;
+  frac.push(Math.floor(num1 / num2));
+  return divide(num2, rem * 10, frac, dividends);
+}
+
+// Problem 27
+function quadraticPrimes() {
+  let longestSeq = 0;
+  let alpha = 0;
+  let beta = 0;
+  let primes = [];
+  for (let a = 999; a > -999; a--) {
+    for (let b = 0; b <= 1000; b++) {
+      let n = 0;
+      let pr = [];
+      while (
+        isPrime(Math.pow(n, 2) + a * n + b) &&
+        Math.pow(n, 2) + a * n + b > 0
+      ) {
+        // pr.push(Math.pow(n, 2) + a * n + b);
+        n++;
+      }
+      if (n > longestSeq) {
+        longestSeq = n;
+        alpha = a;
+        beta = b;
+        primes = pr;
+      }
+    }
+  }
+
+  //return { longestSeq, alpha, beta, product, primes };
+  return alpha * beta;
+}
+
+//Problem 28
+
+function spiral(num) {
+  if (num == 1) return 1;
+  let num1,
+    num2,
+    num3,
+    num4,
+    diff = num - 1;
+  num1 = Math.pow(num, 2);
+  num2 = num1 - diff;
+  num3 = num2 - diff;
+  num4 = num3 - diff;
+  return num1 + num2 + num3 + num4;
+}
+
+function spiralSum(sideLength) {
+  sum = 0;
+  for (let i = 1; i <= sideLength; i += 2) {
+    sum += spiral(i);
+  }
+  return sum;
+}
+
+function distinctPowers(a, b) {
+  let results = [];
+  for (let i = 2; i <= a; i++) {
+    for (let j = 2; j <= b; j++) {
+      let res = Math.pow(i, j);
+      if (!results.includes(res)) results.push(res);
+    }
+  }
+  return results;
+}
+
+function timeToCall(func) {
+  var t0 = performance.now();
+  func();
+  var t1 = performance.now();
+  return `Call to ${func().name} took ${(t1 - t0).toFixed(4)} milliseconds.`;
+}
+
 function createProblem(functionName) {
   let problemCode = functionName,
     problemTime = timeToCall(functionName),
@@ -591,7 +1024,10 @@ var funcs = [
   highlyDivisibleTriangleNum,
   large_sum,
   colbatzSequence,
-  latticePaths
+  latticePaths,
+  // lexicographic_perms,
+  reciprocal,
+  quadraticPrimes
 ];
 window.addEventListener("DOMContentLoaded", function() {
   let problemContainer = document.querySelector(".problemContainer");
