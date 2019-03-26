@@ -962,15 +962,74 @@ function spiralSum(sideLength) {
   return sum;
 }
 
+function multiply(num1, num2) {
+  if (typeof num1 == "number") {
+    let str = num1
+      .toString()
+      .split("")
+      .map(s => {
+        return Number(s);
+      });
+    num1 = str;
+  }
+  if (typeof num2 == "number") {
+    let str = num2
+      .toString()
+      .split("")
+      .map(s => {
+        return Number(s);
+      });
+    num2 = str;
+  }
+  let res,
+    number2 = num2;
+  // let number2 = [...num2.toString()].map(char => Number(char));
+  // console.log(num2);
+  for (let i = number2.length - 1; i >= 0; i--) {
+    var sum;
+    //Singles
+    if (i == number2.length - 1) {
+      if (number2[i] == 0) {
+      } else {
+        res = multiplyBySingleDigit(num1, Number(number2[i]));
+      }
+    } else {
+      let zeros = number2.length - 1 - i;
+      if (number2[i] == 0 && i != 0) {
+      } else {
+        sum = multiplyBySingleDigit(num1, Number(number2[i]));
+        for (let i = 0; i < zeros; i++) {
+          sum.push(0);
+        }
+        let sub = res ? add(res, sum) : sum;
+        res = sub;
+      }
+    }
+  }
+  return res;
+}
+
+function power(base, exp) {
+  let res = base;
+  if (exp == 0) return 1;
+  if (exp == 1) return base;
+  for (let i = 0; i < exp - 1; i++) {
+    let multi = multiply(res, base);
+    res = multi;
+  }
+  return res;
+}
+
 function distinctPowers(a, b) {
   let results = [];
   for (let i = 2; i <= a; i++) {
     for (let j = 2; j <= b; j++) {
-      let res = Math.pow(i, j);
-      if (!results.includes(res)) results.push(res);
+      let sum = power([i], j).join("");
+
+      if (0 > results.indexOf(sum)) results.push(sum);
     }
   }
-  return results;
+  return results.sort();
 }
 
 function timeToCall(func) {
